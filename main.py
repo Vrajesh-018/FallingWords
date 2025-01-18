@@ -1,7 +1,8 @@
 import asyncio
 import os
 import pygame
-import random 
+import random
+import sys 
 
 pygame.init()
 pygame.mixer.init()
@@ -29,9 +30,14 @@ gameWindow = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Type Shooter !")
 pygame.display.update()
 
-# Background Image
+# Background image of welcome page
+wlcm_bgimg = pygame.image.load(f"{Dir}\\Data\\image\\wlcm.jpg")
+wlcm_bgimg = pygame.transform.scale(wlcm_bgimg, (WIDTH, HEIGHT)).convert_alpha()
+
+# Background Image of game
 bgimg = pygame.image.load(f"{Dir}\\Data\\image\\Back.jpeg")
 bgimg = pygame.transform.scale(bgimg, (WIDTH,HEIGHT)).convert_alpha()
+
 
 # Text Functions
 def Text_screen(text, colour, x, y):
@@ -63,29 +69,9 @@ def randomWord(lst):
 # Checker Function
 def checker(user_text, text):
     """ This function checks user input text with the random word chosen from the list """
-    global Score
-    global gameOver
-    global Dir
-    global HiScore
-    if user_text == text:
-        Score +=1
-        block_y = 0
-        block_x = random.randint(0,WIDTH-80)
-        # print(Score)
-        with open(f"{Dir}\\Data\\levels\\HiScore.txt", "r+") as f:
-            read = f.read()
-            HiScore = int(read)
+    pass
 
-            if Score>HiScore:
-                HiScore = Score
-                f.truncate(0)
-                f.seek(0)
-                f.write(str(Score))
-    else:
-        Score -= 1
-        if Score <= 0:
-            Score = 0
-            gameOver=True
+    
 
 # Game Loop
 def gameLoop():
@@ -100,7 +86,10 @@ def gameLoop():
     block_size_y = 30
     init_Velocity = 1.5
     word_List = []
+    global Score
+    global Dir
     global gameOver
+    global HEIGHT
 
     # Checking for High Score 
     global HiScore
@@ -131,7 +120,6 @@ def gameLoop():
         if gameOver:
             gameWindow.fill(white)
             Text_screen("Game Over !", red,(WIDTH/2)-150, 250)
-            # Text_screen("Press Enter to play again", red,(WIDTH/2)-280, 350)
             Text_screen(f"Score : {Score}    High Score : {HiScore}", black,(WIDTH/2)-280 ,350)
             Text_block("Press enter to play again", black, (WIDTH/2)-150, 450)
             for event in pygame.event.get():
@@ -149,11 +137,25 @@ def gameLoop():
                 
                 if event.type== pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        checker(user_text, text)
+                        if user_text == text:
+                            Score +=1
+                            if Score>HiScore:
+                                with open(f"{Dir}\\Data\\levels\\HiScore.txt", "r+") as f:
+                                    read = f.read()
+                                    HiScore = int(read)
+                                    HiScore = Score
+                                    f.truncate(0)
+                                    f.seek(0)
+                                    f.write(str(Score))
+                        else:
+                            Score -= 1
+                            if Score <= 0:
+                                Score = 0
+                                gameOver=True
+                        # checker(user_text, text)
                         block_y = 0
-                        block_x = random.randint(0,WIDTH-80)
+                        block_x = random.randint(Header_Height,WIDTH-80)
                         text = randomWord(word_List)
-
 
                     if event.key == pygame.K_BACKSPACE: 
                         # get text input from 0 to -1 i.e. end. 
@@ -163,9 +165,7 @@ def gameLoop():
                         user_text += event.unicode
                         if event.key == pygame.K_SPACE:
                             user_text = ''
-
-  
-            if block_y == (HEIGHT-100):
+            if block_y == (HEIGHT-75):
                 gameOver = True 
 
             # Gives background image
@@ -176,10 +176,10 @@ def gameLoop():
             Text_block(text, black, block_x+15, block_y+5)
 
             # level up line :- score 10 points without crossing it to level up
-            pygame.draw.rect(gameWindow,white,[0, 600, WIDTH, 1])
+            pygame.draw.rect(gameWindow,white,[0, (HEIGHT-175), WIDTH, 1])
 
             # end line
-            pygame.draw.rect(gameWindow,red,[0, (HEIGHT-100), WIDTH, 1])
+            pygame.draw.rect(gameWindow,red,[0, (HEIGHT-75), WIDTH, 1])
 
             # Header of the Game window
             pygame.draw.rect(gameWindow, white,[0, 0, Header_Width,Header_Height])
@@ -202,10 +202,9 @@ def gameLoop():
 
         pygame.display.update()
         clock.tick(fps)
-        
 
     pygame.quit()
-    quit()
+    sys.exit()
 
 #__main__
 async def main():
@@ -213,8 +212,9 @@ async def main():
     # Welcome Page
     exitGame = False
     while not exitGame:
-        Text_screen("Welcome to world of Falling Words!", white, WIDTH/7, HEIGHT/3 )
-        Text_screen("Enter or Spacebar to play", white, WIDTH/5, HEIGHT/2 )
+        gameWindow.blit(wlcm_bgimg,(0,0))
+        Text_screen("Welcome to world of Falling Words!", black, WIDTH/7, HEIGHT-100 )
+        Text_block("Press \"Enter\" or \"Spacebar\" to play", black, (WIDTH/3)-50, HEIGHT-50 )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exitGame= True
