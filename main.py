@@ -12,6 +12,7 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 yellow = (255,244,20)
+seaGreen = (46, 139, 87)
 
 # Specifying Game Variables
 HEIGHT = 750
@@ -135,6 +136,31 @@ def blockSize(txt):
     size = 16 * text_length
     return size
 
+def rulesAndInstructions():
+    """ Rules and Instruction of the games """
+    r1 = "1. Score Consecutive 20 points without letting the block cross white line to level up"
+    r2 = "2. if the word block crosses the red line it's Game Over "
+    r3 = "3. Hit \"Space bar\" to get a new word"
+    r4 = "4. You get +1 for every correct word and -1 for every negative word "
+    r5 = "5. If your score ever become 0, the Game will end"
+    r6 = "6. Press \"F1\" to pause and replay"
+    while True:
+        gameWindow.fill(white)
+        Text_screen("Rules : ", black, 30, 100)
+        Text_block(r1, black,60, 200)
+        Text_block(r2, black,60, 250)
+        Text_block(r3, black,60, 300)
+        Text_block(r4, black,60, 350)
+        Text_block(r5, black,60, 400)
+        Text_block(r6, black,60, 450)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    main()
+        pygame.display.update()
 # Game Loop
 def gameLoop():
     """ This is the game loop where the game begins """
@@ -194,7 +220,7 @@ def gameLoop():
             block_y += init_Velocity
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    exitGame=True
+                    exitGame=True                    
                 
                 if event.type== pygame.KEYDOWN:
 
@@ -217,8 +243,8 @@ def gameLoop():
                         while not pause:
                             for event in pygame.event.get():
                                 if event.type == pygame.QUIT:
-                                    pause = True
-                                    exitGame = True
+                                    pygame.quit()
+                                    sys.exit()
                                     
                                 if event.type == pygame.KEYDOWN:
                                     if event.key == pygame.K_F1:
@@ -259,7 +285,7 @@ def gameLoop():
             
             # set width of textfield so that text cannot get outside of user's text input 
             input_rect.w = max(WIDTH-100, text_surface.get_width()+10) 
-            
+
             # display.flip() will update only a portion of the screen to updated, not full area 
             pygame.display.flip() 
 
@@ -279,13 +305,17 @@ def main():
         gameWindow.blit(wlcm_bgimg,(0,0))
         Text_screen("Welcome to world of Falling Words!", black, (WIDTH/10), HEIGHT-130 )
         Text_block("Press \"Enter\" or \"Spacebar\" to play", black, (WIDTH/3)-20, HEIGHT-60 )
+        Text_block("Press \"R\" for rules ", black, (WIDTH/3)+50, HEIGHT-30 )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exitGame= True
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key==pygame.K_RETURN:
                     gameWindow.blit(bgimg,(0,0))
                     gameLoop()
+                if event.key == pygame.K_r:
+                    rulesAndInstructions()
                     
         pygame.display.update()
         clock.tick(fps)
