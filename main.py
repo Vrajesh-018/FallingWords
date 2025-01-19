@@ -165,7 +165,7 @@ def gameLoop():
                         user_text += event.unicode
                         if event.key == pygame.K_SPACE:
                             user_text = ''
-            if block_y == (HEIGHT-75):
+            if block_y >= (HEIGHT-75):
                 gameOver = True 
 
             # Gives background image
