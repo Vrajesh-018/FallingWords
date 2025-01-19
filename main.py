@@ -1,8 +1,8 @@
-import asyncio
 import os
 import pygame
 import random
-import sys 
+import sys
+import time
 
 pygame.init()
 pygame.mixer.init()
@@ -11,19 +11,27 @@ pygame.mixer.init()
 white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
+yellow = (255,244,20)
 
 # Specifying Game Variables
-HEIGHT = 700
-WIDTH = 1100
-font = pygame.font.SysFont(None, 60)
-blockFont = pygame.font.SysFont(None, 30)
-# headerFont = pygame.font.SysFont(None, 60)
+HEIGHT = 750
+WIDTH = 1200
 clock = pygame.time.Clock()
 Dir = os.getcwd()
 Score = 0
 HiScore = 0
+level_Up_Score = 0
 gameOver = False
+exitGame = False
+level = 1
 fps = 60
+word_List = []
+init_Velocity = 1.5
+
+# Choosing font style and size 
+font = pygame.font.SysFont(None, 80)
+blockFont = pygame.font.SysFont(None, 30)
+scoreFont = pygame.font.SysFont(None, 60)
 
 # Creating Game window
 gameWindow = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -48,52 +56,96 @@ def Text_block(text, colour, x, y):
     """ Function to write text on the block """
     screen_text = blockFont.render(text, True, colour)
     gameWindow.blit(screen_text, [x,y])
+def Text_Score(text, colour, x,y):
+    """ Function to Write Score on the screen """
+    screen_text = scoreFont.render(text, True, colour)
+    gameWindow.blit(screen_text, [x,y])
 
 # Function to create a list of words        
 def wordList(lst):
     """ This function creates a list of words """
-    Dir = os.getcwd()
-    with open(f"{Dir}\\Data\\levels\\level1.txt", "r") as f:
+    with open(f"{Dir}\\data\\files\\level{str(level)}.txt", "r") as f:
         read = f.read()
         read = read.split(" ")
         for i in read:
             lst.append(i)
 
+
 # Function to choose word randomly from list
 def randomWord(lst):
     """ This function choose a random word from the list"""
-    wordIndice = random.randint(0,len(lst)-2)
+    wordIndice = random.randint(0,len(lst)-1)
     word = lst[wordIndice]
     return word
 
-# Checker Function
-def checker(user_text, text):
-    """ This function checks user input text with the random word chosen from the list """
-    pass
+# Music Function
+def gameMusic(fileName):
+        """ This function Loads the music and plays it """
+        pygame.mixer.music.load(f"{Dir}\\data\\music\\{fileName}.mp3")
+        pygame.mixer.music.play()
 
-    
+# Checker Function
+def checker(user_text, txt, block_position):
+    """ This function checks user input text with the random word chosen from the list 
+        and also increement or decreement the score """
+    global Score, HiScore, gameOver, level_Up_Score,level, word_List, init_Velocity
+    if user_text == txt:
+        gameMusic("correct")
+        Score +=1
+        if block_position >= (HEIGHT-175):
+                level_Up_Score = 0
+        else:
+            level_Up_Score += 1
+            if level_Up_Score == 20:
+                gameMusic("LevelUp")
+
+                if level<3:
+                    level_Up_Score = 0
+                    level += 1
+                    word_List = []
+                    wordList(word_List)
+                    text = randomWord(word_List)
+                    levelUP("Level Up!",(WIDTH/3)+50, HEIGHT/2)
+                else:
+                    init_Velocity += 0.5
+                    levelUP("You're a fast Typist!", (WIDTH/4)+30, HEIGHT/2)
+
+        if Score>HiScore:
+            with open(f"{Dir}\\data\\files\\HiScore.txt", "w") as f:
+                HiScore = Score
+                f.write(str(Score))
+    else:
+        gameMusic("incorrect")
+        Score -= 1
+        level_Up_Score =0
+        if Score <= 0:
+            gameMusic("gameOver")
+            Score = 0
+            gameOver=True
+
+def levelUP(txt, x, y):
+    """ Shows text on the screen when the player level ups """
+    Text_screen(txt, yellow, x, y)
+    pygame.display.update()
+    time.sleep(1)
+
+def blockSize(txt):
+    """ Changes the size of the falling block """
+    text_length = len(txt)
+    size = 16 * text_length
+    return size
 
 # Game Loop
 def gameLoop():
-    """This is the game loop where the game begins"""
-    # Game specific variables
+    """ This is the game loop where the game begins """
+    global Score, gameOver, HiScore, exitGame, word_List
+
+    # Header Dimension
     Header_Width = WIDTH
-    Header_Height = 100
-    exitGame = False
-    block_x = random.randint(5, WIDTH-80)
-    block_y = Header_Height
-    block_size_x = 80
-    block_size_y = 30
-    init_Velocity = 1.5
-    word_List = []
-    global Score
-    global Dir
-    global gameOver
-    global HEIGHT
+    Header_Height = 130
 
     # Checking for High Score 
-    global HiScore
-    with open(f"{Dir}\\Data\\levels\\HiScore.txt", "r") as f:
+    with open(f"{Dir}\\data\\files\\HiScore.txt", "r") as f:
         read = f.read()
         HiScore = int(read)
 
@@ -102,7 +154,15 @@ def gameLoop():
     # Choosing random word from the list
     text = randomWord(word_List)
 
-    # Variables:-
+    # Falling Block Dimensions
+    block_size_x = blockSize(text)
+    block_size_y = 30
+    block_x = random.randint(5, WIDTH-(block_size_x-15))
+    block_y = Header_Height
+    # Velocity of falling block
+
+
+    # Dimension of Input Box
     box_left = 50
     box_top = HEIGHT-50
     box_width = WIDTH-100
@@ -116,17 +176,18 @@ def gameLoop():
     color = pygame.Color('lightskyblue3') 
 
     while not exitGame:
-
+        pause = False
         if gameOver:
             gameWindow.fill(white)
-            Text_screen("Game Over !", red,(WIDTH/2)-150, 250)
-            Text_screen(f"Score : {Score}    High Score : {HiScore}", black,(WIDTH/2)-280 ,350)
+            Text_screen("Game Over !", red,(WIDTH/2)-180, 250)
+            Text_Score(f"Score : {Score}    High Score : {HiScore}", black,(WIDTH/2)-280 ,350)
             Text_block("Press enter to play again", black, (WIDTH/2)-150, 450)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exitGame=True
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
+                        Score = 0
                         gameOver=False
                         gameLoop()
         else:
@@ -136,26 +197,13 @@ def gameLoop():
                     exitGame=True
                 
                 if event.type== pygame.KEYDOWN:
+
                     if event.key == pygame.K_SPACE:
-                        if user_text == text:
-                            Score +=1
-                            if Score>HiScore:
-                                with open(f"{Dir}\\Data\\levels\\HiScore.txt", "r+") as f:
-                                    read = f.read()
-                                    HiScore = int(read)
-                                    HiScore = Score
-                                    f.truncate(0)
-                                    f.seek(0)
-                                    f.write(str(Score))
-                        else:
-                            Score -= 1
-                            if Score <= 0:
-                                Score = 0
-                                gameOver=True
-                        # checker(user_text, text)
-                        block_y = 0
-                        block_x = random.randint(Header_Height,WIDTH-80)
+                        checker(user_text, text,block_y)
                         text = randomWord(word_List)
+                        block_size_x = blockSize(text)
+                        block_y = Header_Height
+                        block_x = random.randint(5, WIDTH-(block_size_x-20))
 
                     if event.key == pygame.K_BACKSPACE: 
                         # get text input from 0 to -1 i.e. end. 
@@ -165,7 +213,22 @@ def gameLoop():
                         user_text += event.unicode
                         if event.key == pygame.K_SPACE:
                             user_text = ''
+                    if event.key == pygame.K_F1:
+                        while not pause:
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    pause = True
+                                    exitGame = True
+                                    
+                                if event.type == pygame.KEYDOWN:
+                                    if event.key == pygame.K_F1:
+                                        pause = True
+                            gameWindow.fill('lightskyblue3')
+                            Text_screen("Game Paused", red,(WIDTH/2)-180, (HEIGHT/2)-50)
+                            Text_block("Press \"F1\" to continue", black, (WIDTH/3)+100, (HEIGHT/2)+30)
+                            pygame.display.update()
             if block_y >= (HEIGHT-75):
+                gameMusic("gameOver")
                 gameOver = True 
 
             # Gives background image
@@ -173,18 +236,19 @@ def gameLoop():
 
             # Random block with random words
             pygame.draw.rect(gameWindow, white, [block_x, block_y, block_size_x, block_size_y])
-            Text_block(text, black, block_x+15, block_y+5)
+            Text_block(text, black, block_x+10, block_y+5)
 
             # level up line :- score 10 points without crossing it to level up
             pygame.draw.rect(gameWindow,white,[0, (HEIGHT-175), WIDTH, 1])
 
-            # end line
+            # End line
             pygame.draw.rect(gameWindow,red,[0, (HEIGHT-75), WIDTH, 1])
 
             # Header of the Game window
             pygame.draw.rect(gameWindow, white,[0, 0, Header_Width,Header_Height])
             Text_screen("Falling Words", black,30, 50)
-            Text_screen(f"Score : {Score}   High Score : {HiScore}", black, 460, 50)
+            Text_Score(f"Score : {Score}   High Score : {HiScore}", black, WIDTH-600, 30)
+            Text_block(f"Score neended to level up : {20 - level_Up_Score}", black,WIDTH-500, 85 )
             
             # draw rectangle and argument passed which should be on screen 
             pygame.draw.rect(gameWindow, color, input_rect) 
@@ -207,14 +271,14 @@ def gameLoop():
     sys.exit()
 
 #__main__
-async def main():
+def main():
     """ Main function i.e., welcome page"""
     # Welcome Page
-    exitGame = False
+    global exitGame
     while not exitGame:
         gameWindow.blit(wlcm_bgimg,(0,0))
-        Text_screen("Welcome to world of Falling Words!", black, WIDTH/7, HEIGHT-100 )
-        Text_block("Press \"Enter\" or \"Spacebar\" to play", black, (WIDTH/3)-50, HEIGHT-50 )
+        Text_screen("Welcome to world of Falling Words!", black, (WIDTH/10), HEIGHT-130 )
+        Text_block("Press \"Enter\" or \"Spacebar\" to play", black, (WIDTH/3)-20, HEIGHT-60 )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exitGame= True
@@ -224,7 +288,6 @@ async def main():
                     gameLoop()
                     
         pygame.display.update()
-        await asyncio.sleep(0)
         clock.tick(fps)
 
-asyncio.run(main())
+main()
