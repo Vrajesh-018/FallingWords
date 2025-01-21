@@ -28,11 +28,12 @@ level = 1
 fps = 30
 word_List = []
 init_Velocity = 3
+lives = 5
 
 # Creating Game window
 gameWindow = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Type Shooter !")
-
+   
 # Background image of welcome page
 wlcm_bgimg = pygame.image.load(f"{Dir}\\Data\\image\\wlcm.jpg")
 wlcm_bgimg = pygame.transform.scale(wlcm_bgimg, (WIDTH, HEIGHT)).convert_alpha()
@@ -74,7 +75,7 @@ def gameMusic(fileName):
 def checker(user_text, txt, block_position):
     """ This function checks user input text with the random word chosen from the list 
         and also increement or decreement the score """
-    global Score, HiScore, gameOver, level_Up_Score,level, word_List, init_Velocity
+    global Score, HiScore, gameOver, level_Up_Score,level, word_List, init_Velocity, lives
     if user_text == txt:
         gameMusic("correct")
         Score +=1
@@ -102,9 +103,9 @@ def checker(user_text, txt, block_position):
                 f.write(str(Score))
     else:
         gameMusic("incorrect")
-        Score -= 1
+        lives -= 1
         level_Up_Score =0
-        if Score <= 0:
+        if lives == 0:
             gameMusic("gameOver")
             Score = 0
             gameOver=True
@@ -188,7 +189,10 @@ def gameLoop():
 
     while not exitGame:
         pause = False
+        global lives, level_Up_Score
         if gameOver:
+            lives = 5
+            level_Up_Score = 0
             gameWindow.fill(white)
             Text_screen("Game Over !", red, 80, (WIDTH/2)-180, 250)
             Text_screen(f"Score : {Score}    High Score : {HiScore}", black, 60, (WIDTH/2)-280 ,350)
@@ -258,7 +262,7 @@ def gameLoop():
             # Header of the Game window
             pygame.draw.rect(gameWindow, white,[0, 0, Header_Width,Header_Height])
             Text_screen("Falling Words", black, 80,30, 50)
-            Text_screen(f"Score : {Score}   High Score : {HiScore}", black, 60, WIDTH-600, 30)
+            Text_screen(f"Score : {Score}   High Score : {HiScore}    Lives : {lives}", black, 50, WIDTH-650, 30)
             Text_screen(f"Score neended to level up : {20 - level_Up_Score}", black, 30, WIDTH-500, 85 )
             
             # draw rectangle and argument passed which should be on screen 
