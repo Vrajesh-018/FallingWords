@@ -25,19 +25,13 @@ level_Up_Score = 0
 gameOver = False
 exitGame = False
 level = 1
-fps = 60
+fps = 30
 word_List = []
-init_Velocity = 1.5
-
-# Choosing font style and size 
-font = pygame.font.SysFont(None, 80)
-blockFont = pygame.font.SysFont(None, 30)
-scoreFont = pygame.font.SysFont(None, 60)
+init_Velocity = 3
 
 # Creating Game window
 gameWindow = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Type Shooter !")
-pygame.display.update()
 
 # Background image of welcome page
 wlcm_bgimg = pygame.image.load(f"{Dir}\\Data\\image\\wlcm.jpg")
@@ -47,19 +41,11 @@ wlcm_bgimg = pygame.transform.scale(wlcm_bgimg, (WIDTH, HEIGHT)).convert_alpha()
 bgimg = pygame.image.load(f"{Dir}\\Data\\image\\Back.jpeg")
 bgimg = pygame.transform.scale(bgimg, (WIDTH,HEIGHT)).convert_alpha()
 
-
-# Text Functions
-def Text_screen(text, colour, x, y):
+# Text Function
+def Text_screen(text, colour,fontSize, x, y):
     """ Function to write text on the screen """
+    font = pygame.font.SysFont(None, fontSize)
     screen_text = font.render(text, True, colour)
-    gameWindow.blit(screen_text, [x,y])
-def Text_block(text, colour, x, y):
-    """ Function to write text on the block """
-    screen_text = blockFont.render(text, True, colour)
-    gameWindow.blit(screen_text, [x,y])
-def Text_Score(text, colour, x,y):
-    """ Function to Write Score on the screen """
-    screen_text = scoreFont.render(text, True, colour)
     gameWindow.blit(screen_text, [x,y])
 
 # Function to create a list of words        
@@ -70,7 +56,6 @@ def wordList(lst):
         read = read.split(" ")
         for i in read:
             lst.append(i)
-
 
 # Function to choose word randomly from list
 def randomWord(lst):
@@ -126,7 +111,7 @@ def checker(user_text, txt, block_position):
 
 def levelUP(txt, x, y):
     """ Shows text on the screen when the player level ups """
-    Text_screen(txt, yellow, x, y)
+    Text_screen(txt, yellow, 80, x, y)
     pygame.display.update()
     time.sleep(1)
 
@@ -146,13 +131,13 @@ def rulesAndInstructions():
     r6 = "6. Press \"F1\" to pause and replay"
     while True:
         gameWindow.fill(white)
-        Text_screen("Rules : ", black, 30, 100)
-        Text_block(r1, black,60, 200)
-        Text_block(r2, black,60, 250)
-        Text_block(r3, black,60, 300)
-        Text_block(r4, black,60, 350)
-        Text_block(r5, black,60, 400)
-        Text_block(r6, black,60, 450)
+        Text_screen("Rules : ", black,80, 30, 100 )
+        Text_screen( r1, black, 30, 60, 200 )
+        Text_screen( r2, black, 30, 60, 250 )
+        Text_screen( r3, black, 30, 60, 300 )
+        Text_screen( r4, black, 30, 60, 350 )
+        Text_screen( r5, black, 30, 60, 400 )
+        Text_screen( r6, black, 30, 60, 450 )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -161,6 +146,7 @@ def rulesAndInstructions():
                 if event.key == pygame.K_r:
                     main()
         pygame.display.update()
+
 # Game Loop
 def gameLoop():
     """ This is the game loop where the game begins """
@@ -187,7 +173,6 @@ def gameLoop():
     block_y = Header_Height
     # Velocity of falling block
 
-
     # Dimension of Input Box
     box_left = 50
     box_top = HEIGHT-50
@@ -205,9 +190,9 @@ def gameLoop():
         pause = False
         if gameOver:
             gameWindow.fill(white)
-            Text_screen("Game Over !", red,(WIDTH/2)-180, 250)
-            Text_Score(f"Score : {Score}    High Score : {HiScore}", black,(WIDTH/2)-280 ,350)
-            Text_block("Press enter to play again", black, (WIDTH/2)-150, 450)
+            Text_screen("Game Over !", red, 80, (WIDTH/2)-180, 250)
+            Text_screen(f"Score : {Score}    High Score : {HiScore}", black, 60, (WIDTH/2)-280 ,350)
+            Text_screen("Press enter to play again", black, 30, (WIDTH/2)-150, 450)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     exitGame=True
@@ -250,8 +235,8 @@ def gameLoop():
                                     if event.key == pygame.K_F1:
                                         pause = True
                             gameWindow.fill('lightskyblue3')
-                            Text_screen("Game Paused", red,(WIDTH/2)-180, (HEIGHT/2)-50)
-                            Text_block("Press \"F1\" to continue", black, (WIDTH/3)+100, (HEIGHT/2)+30)
+                            Text_screen("Game Paused", red, 80,(WIDTH/2)-180, (HEIGHT/2)-50)
+                            Text_screen("Press \"F1\" to continue", black, 30, (WIDTH/3)+100, (HEIGHT/2)+30)
                             pygame.display.update()
             if block_y >= (HEIGHT-75):
                 gameMusic("gameOver")
@@ -262,7 +247,7 @@ def gameLoop():
 
             # Random block with random words
             pygame.draw.rect(gameWindow, white, [block_x, block_y, block_size_x, block_size_y])
-            Text_block(text, black, block_x+10, block_y+5)
+            Text_screen(text, black , 30, block_x+10, block_y+5)
 
             # level up line :- score 10 points without crossing it to level up
             pygame.draw.rect(gameWindow,white,[0, (HEIGHT-175), WIDTH, 1])
@@ -272,9 +257,9 @@ def gameLoop():
 
             # Header of the Game window
             pygame.draw.rect(gameWindow, white,[0, 0, Header_Width,Header_Height])
-            Text_screen("Falling Words", black,30, 50)
-            Text_Score(f"Score : {Score}   High Score : {HiScore}", black, WIDTH-600, 30)
-            Text_block(f"Score neended to level up : {20 - level_Up_Score}", black,WIDTH-500, 85 )
+            Text_screen("Falling Words", black, 80,30, 50)
+            Text_screen(f"Score : {Score}   High Score : {HiScore}", black, 60, WIDTH-600, 30)
+            Text_screen(f"Score neended to level up : {20 - level_Up_Score}", black, 30, WIDTH-500, 85 )
             
             # draw rectangle and argument passed which should be on screen 
             pygame.draw.rect(gameWindow, color, input_rect) 
@@ -288,8 +273,7 @@ def gameLoop():
 
             # display.flip() will update only a portion of the screen to updated, not full area 
             pygame.display.flip() 
-
-
+        
         pygame.display.update()
         clock.tick(fps)
 
@@ -303,9 +287,9 @@ def main():
     global exitGame
     while not exitGame:
         gameWindow.blit(wlcm_bgimg,(0,0))
-        Text_screen("Welcome to world of Falling Words!", black, (WIDTH/10), HEIGHT-130 )
-        Text_block("Press \"Enter\" or \"Spacebar\" to play", black, (WIDTH/3)-20, HEIGHT-60 )
-        Text_block("Press \"R\" for rules ", black, (WIDTH/3)+50, HEIGHT-30 )
+        Text_screen("Welcome to world of Falling Words!", black, 80, (WIDTH/10), HEIGHT-130 )
+        Text_screen("Press \"Enter\" or \"Spacebar\" to play", black, 30, (WIDTH/3)-20, HEIGHT-60 )
+        Text_screen("Press \"R\" for rules ", black, 30, (WIDTH/3)+50, HEIGHT-30 )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exitGame= True
