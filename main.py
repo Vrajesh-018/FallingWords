@@ -107,7 +107,6 @@ def checker(user_text, txt, block_position):
         level_Up_Score =0
         if lives == 0:
             gameMusic("gameOver")
-            Score = 0
             gameOver=True
 
 def levelUP(txt, x, y):
@@ -124,11 +123,11 @@ def blockSize(txt):
 
 def rulesAndInstructions():
     """ Rules and Instruction of the games """
-    r1 = "1. Score Consecutive 20 points without letting the block cross white line to level up"
+    r1 = "1. You get 1 point for every correct word "
     r2 = "2. if the word block crosses the red line it's Game Over "
     r3 = "3. Hit \"Space bar\" to get a new word"
-    r4 = "4. You get +1 for every correct word and -1 for every negative word "
-    r5 = "5. If your score ever become 0, the Game will end"
+    r4 = "4. Score Consecutive 20 points without letting the block cross white line to level up"
+    r5 = "5. You got 5 lives and the lifes reduces by 1 for every wrong word"
     r6 = "6. Press \"F1\" to pause and replay"
     while True:
         gameWindow.fill(white)
@@ -263,7 +262,7 @@ def gameLoop():
             pygame.draw.rect(gameWindow, white,[0, 0, Header_Width,Header_Height])
             Text_screen("Falling Words", black, 80,30, 50)
             Text_screen(f"Score : {Score}   High Score : {HiScore}    Lives : {lives}", black, 50, WIDTH-650, 30)
-            Text_screen(f"Score neended to level up : {20 - level_Up_Score}", black, 30, WIDTH-500, 85 )
+            Text_screen(f"Score needed to level up : {20 - level_Up_Score}", black, 30, WIDTH-500, 85 )
             
             # draw rectangle and argument passed which should be on screen 
             pygame.draw.rect(gameWindow, color, input_rect) 
